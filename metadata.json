@@ -1,0 +1,5 @@
+{
+  "name": "Codeflix Task System",
+  "description": "A comprehensive daily coding challenge platform for students with role-based access, automated evaluation, and admin monitoring dashboards.",
+  "requestFramePermissions": []
+}
