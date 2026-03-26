@@ -55,8 +55,8 @@ async function startServer() {
 
   app.post("/api/login", (req, res) => {
     const { email, password } = req.body;
-    // Simple mock login
-    const user = users.find(u => u.email === email);
+    // Simple mock login - case insensitive email
+    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
     if (user) {
       res.json(user);
     } else {
@@ -66,13 +66,13 @@ async function startServer() {
 
   app.post("/api/register", (req, res) => {
     const { email, name, role } = req.body;
-    if (users.find(u => u.email === email)) {
+    if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
       return res.status(400).json({ error: "Email already registered" });
     }
     const newUser = {
       id: Math.random().toString(36).substr(2, 9),
       name,
-      email,
+      email: email.toLowerCase(),
       role: role || 'USER',
       category: 'Moderate',
       accessCount: 0,

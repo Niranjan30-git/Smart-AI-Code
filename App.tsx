@@ -98,7 +98,7 @@ const LoginView: React.FC<{ onLogin: (email: string) => void }> = ({ onLogin }) 
         }
         onLogin(email);
       } else {
-        setError(isRegistering ? 'Registration failed. Email might already exist.' : 'Account not found. Please use a registered @gmail.com account.');
+        setError(isRegistering ? 'Registration failed. Email might already exist.' : 'Account not found. Please check your credentials or register.');
         setIsSubmitting(false);
       }
     } catch (err) {
@@ -183,7 +183,7 @@ const LoginView: React.FC<{ onLogin: (email: string) => void }> = ({ onLogin }) 
                 type="email" 
                 required 
                 className="w-full px-5 py-4 rounded-xl bg-[#151515] border border-white/5 text-white placeholder:text-slate-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all font-medium" 
-                placeholder="name@gmail.com" 
+                placeholder="your@email.com" 
                 value={email} 
                 onChange={(e) => setEmail(e.target.value)} 
               />
