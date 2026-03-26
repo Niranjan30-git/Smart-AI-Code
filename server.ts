@@ -15,7 +15,37 @@ async function startServer() {
   app.use(express.json());
 
   // Mock Database in memory for demo
-  let users: any[] = [];
+  let users: any[] = [
+    { 
+      id: 'a1', 
+      name: 'System Admin', 
+      email: 'admin@gmail.com', 
+      role: 'ADMIN', 
+      category: 'Excellent',
+      accessCount: 0,
+      lastAccessDate: new Date().toDateString(),
+      department: 'Computer Science',
+      college: 'Codeflix Institute of Technology',
+      batch: '2024',
+      gender: 'Male',
+      linkedin: 'https://linkedin.com/in/admin'
+    },
+    ...Array.from({ length: 120 }, (_, i) => ({
+      id: `s${i + 1}`,
+      name: `Student ${i + 1}`,
+      email: `student${i + 1}@gmail.com`,
+      role: 'USER',
+      category: i % 3 === 0 ? 'Excellent' : (i % 2 === 0 ? 'Good' : 'Moderate'),
+      accessCount: 0,
+      lastAccessDate: new Date().toDateString(),
+      rollNumber: `CS2024${(i + 1).toString().padStart(3, '0')}`,
+      department: 'Computer Science',
+      batch: '2024',
+      college: 'Codeflix Institute of Technology',
+      gender: i % 2 === 0 ? 'Male' : 'Female',
+      linkedin: `https://linkedin.com/in/student${i + 1}`
+    }))
+  ];
   let submissions: any[] = [];
 
   // API Routes
@@ -40,7 +70,12 @@ async function startServer() {
 
   app.post("/api/users", (req, res) => {
     const user = req.body;
-    users.push(user);
+    const index = users.findIndex(u => u.id === user.id);
+    if (index > -1) {
+      users[index] = { ...users[index], ...user };
+    } else {
+      users.push(user);
+    }
     res.json(user);
   });
 
@@ -50,7 +85,12 @@ async function startServer() {
 
   app.post("/api/submissions", (req, res) => {
     const submission = req.body;
-    submissions.push(submission);
+    const index = submissions.findIndex(s => s.userId === submission.userId && s.problemId === submission.problemId);
+    if (index > -1) {
+      submissions[index] = { ...submissions[index], ...submission };
+    } else {
+      submissions.push(submission);
+    }
     res.json(submission);
   });
 
