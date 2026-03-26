@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { User, UserRole, Problem, Submission, SubmissionStatus, DailyStats, PerformanceCategory, Badge } from './types';
-import { login, logout, getCurrentUser, initDb, getSubmissions, addSubmission, getUsers, incrementAccess } from './services/mockDb';
+import { login, logout, getCurrentUser, initDb, getSubmissions, addSubmission, getUsers, incrementAccess, register } from './services/mockDb';
 import { PROBLEMS, APP_CONFIG, MOTIVATIONAL_QUOTES, TEACHER_MOTIVATIONAL_QUOTES } from './constants';
 import { Navbar } from './components/Navbar';
 import { Button } from './components/Button';
@@ -66,7 +66,10 @@ const ProgressRing: React.FC<{ value: number, size?: number, stroke?: number }> 
 
 // --- LOGIN VIEW ---
 const LoginView: React.FC<{ onLogin: (email: string) => void }> = ({ onLogin }) => {
+  const [isRegistering, setIsRegistering] = useState(false);
   const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [role, setRole] = useState<UserRole>(UserRole.USER);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -77,7 +80,13 @@ const LoginView: React.FC<{ onLogin: (email: string) => void }> = ({ onLogin }) 
     setError('');
 
     try {
-      const user = await login(email);
+      let user;
+      if (isRegistering) {
+        user = await register(email, name, role);
+      } else {
+        user = await login(email);
+      }
+
       if (user) {
         if (user.role === UserRole.USER) {
           const canAccess = await incrementAccess(user.id);
@@ -89,7 +98,7 @@ const LoginView: React.FC<{ onLogin: (email: string) => void }> = ({ onLogin }) 
         }
         onLogin(email);
       } else {
-        setError('Account not found. Please use a registered @gmail.com account.');
+        setError(isRegistering ? 'Registration failed. Email might already exist.' : 'Account not found. Please use a registered @gmail.com account.');
         setIsSubmitting(false);
       }
     } catch (err) {
@@ -150,11 +159,24 @@ const LoginView: React.FC<{ onLogin: (email: string) => void }> = ({ onLogin }) 
           </div>
 
           <div className="mb-10">
-            <h3 className="text-2xl font-bold text-white mb-2">Welcome back</h3>
-            <p className="text-slate-500 font-medium">Enter your credentials to access your workspace.</p>
+            <h3 className="text-2xl font-bold text-white mb-2">{isRegistering ? 'Create Account' : 'Welcome back'}</h3>
+            <p className="text-slate-500 font-medium">{isRegistering ? 'Join the elite coding community.' : 'Enter your credentials to access your workspace.'}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            {isRegistering && (
+              <div className="space-y-2">
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] px-1">Full Name</label>
+                <input 
+                  type="text" 
+                  required 
+                  className="w-full px-5 py-4 rounded-xl bg-[#151515] border border-white/5 text-white placeholder:text-slate-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all font-medium" 
+                  placeholder="John Doe" 
+                  value={name} 
+                  onChange={(e) => setName(e.target.value)} 
+                />
+              </div>
+            )}
             <div className="space-y-2">
               <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] px-1">Professional Email</label>
               <input 
@@ -166,6 +188,19 @@ const LoginView: React.FC<{ onLogin: (email: string) => void }> = ({ onLogin }) 
                 onChange={(e) => setEmail(e.target.value)} 
               />
             </div>
+            {isRegistering && (
+              <div className="space-y-2">
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] px-1">Account Type</label>
+                <select 
+                  className="w-full px-5 py-4 rounded-xl bg-[#151515] border border-white/5 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all font-medium"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value as UserRole)}
+                >
+                  <option value={UserRole.USER}>Student</option>
+                  <option value={UserRole.ADMIN}>Administrator</option>
+                </select>
+              </div>
+            )}
             <div className="space-y-2">
               <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] px-1">Secure Key</label>
               <input 
@@ -179,9 +214,18 @@ const LoginView: React.FC<{ onLogin: (email: string) => void }> = ({ onLogin }) 
             </div>
             {error && <div className="bg-red-500/10 text-red-400 text-xs font-bold p-4 rounded-xl border border-red-500/20 animate-slide-in-right">{error}</div>}
             <Button type="submit" fullWidth size="lg" className="py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-base font-bold transition-all active:scale-[0.98]" disabled={isSubmitting}>
-              {isSubmitting ? 'Authenticating...' : 'Enter Workspace'}
+              {isSubmitting ? (isRegistering ? 'Registering...' : 'Authenticating...') : (isRegistering ? 'Create Account' : 'Enter Workspace')}
             </Button>
           </form>
+
+          <div className="mt-6 text-center">
+            <button 
+              onClick={() => setIsRegistering(!isRegistering)}
+              className="text-indigo-500 text-sm font-bold hover:text-indigo-400 transition-colors"
+            >
+              {isRegistering ? 'Already have an account? Login' : "Don't have an account? Register"}
+            </button>
+          </div>
 
           <div className="mt-10 pt-10 border-t border-white/5">
             <p className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.2em] mb-4 text-center">Quick Access Profiles</p>

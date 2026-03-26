@@ -127,6 +127,21 @@ export const login = async (email: string): Promise<User | null> => {
   return null;
 };
 
+export const register = async (email: string, name: string, role: UserRole): Promise<User | null> => {
+  const response = await fetch(`${API_URL}/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, name, role })
+  });
+  
+  if (response.ok) {
+    const user = await response.json();
+    localStorage.setItem('ai_system_current_user', JSON.stringify(user));
+    return user;
+  }
+  return null;
+};
+
 export const updateUserProfile = async (userId: string, profileData: Partial<User>): Promise<User | null> => {
   const users = await getUsers();
   const userIndex = users.findIndex(u => u.id === userId);

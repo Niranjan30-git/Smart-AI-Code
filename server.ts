@@ -64,6 +64,29 @@ async function startServer() {
     }
   });
 
+  app.post("/api/register", (req, res) => {
+    const { email, name, role } = req.body;
+    if (users.find(u => u.email === email)) {
+      return res.status(400).json({ error: "Email already registered" });
+    }
+    const newUser = {
+      id: Math.random().toString(36).substr(2, 9),
+      name,
+      email,
+      role: role || 'USER',
+      category: 'Moderate',
+      accessCount: 0,
+      lastAccessDate: new Date().toDateString(),
+      department: 'Computer Science',
+      college: 'Codeflix Institute of Technology',
+      batch: '2024',
+      gender: 'Other',
+      linkedin: ''
+    };
+    users.push(newUser);
+    res.json(newUser);
+  });
+
   app.get("/api/users", (req, res) => {
     res.json(users);
   });
